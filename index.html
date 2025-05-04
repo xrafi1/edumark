@@ -1,20 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>EduMark</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Embedded Content</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    iframe {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+  </style>
 </head>
 <body>
-  <iframe src="https://script.google.com/macros/s/AKfycbzAUTboH45DwWup7SzjyDLK0IvhqH-YnA6HC7RgJ517RofUvYxRWtJ7lgBR-pIyZRQNjw/exec"
-          width="100%"
-          height="100%"
-          allowfullscreen="true"
-          style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none;">
-  </iframe>
+  <iframe 
+    src="https://script.google.com/macros/s/AKfycbzAUTboH45DwWup7SzjyDLK0IvhqH-YnA6HC7RgJ517RofUvYxRWtJ7lgBR-pIyZRQNjw/exec"
+    allowfullscreen="true"
+  ></iframe>
 
   <script>
     window.onload = function() {
-      document.querySelector('iframe').requestFullscreen().catch((err) => {
-        console.error(Error attempting to enable full-screen mode: ${err.message});
+      const iframe = document.querySelector('iframe');
+      
+      // Request fullscreen with fallback for mobile browsers
+      function goFullscreen() {
+        if (iframe.requestFullscreen) {
+          iframe.requestFullscreen().catch(err => {
+            console.error(Fullscreen error: ${err.message});
+          });
+        } else if (iframe.webkitRequestFullscreen) { // iOS Safari
+          iframe.webkitRequestFullscreen();
+        } else if (iframe.mozRequestFullScreen) { // Firefox
+          iframe.mozRequestFullScreen();
+        }
+      }
+
+      // Attempt fullscreen on load
+      goFullscreen();
+
+      // Handle orientation changes and resize
+      window.addEventListener('orientationchange', goFullscreen);
+      window.addEventListener('resize', () => {
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
       });
     };
   </script>
