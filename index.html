@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Embedded Content</title>
   <style>
     html, body {
@@ -11,8 +11,8 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      touch-action: manipulation;
     }
+
     iframe {
       position: absolute;
       top: 0;
@@ -20,100 +20,113 @@
       width: 100%;
       height: 100%;
       border: none;
-      display: block;
     }
+
     .fullscreen-button {
       position: fixed;
       bottom: 20px;
       right: 20px;
       padding: 10px 15px;
-      background: rgba(0,0,0,0.7);
-      color: white;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: #fff;
       border: none;
       border-radius: 5px;
-      cursor: pointer;
-      z-index: 1000;
       font-size: 14px;
+      cursor: pointer;
+      z-index: 9999;
     }
   </style>
 </head>
 <body>
+
   <iframe 
     src="https://script.google.com/macros/s/AKfycbyUFXtzeHgevcWx1IaEr_Wzb9PTupwHm-A64g8dAJGw8mmZLox8JBDiHco0krBAT-V9rQ/exec"
     allowfullscreen
     webkitallowfullscreen
     mozallowfullscreen
+    id="myIframe"
   ></iframe>
-  
-  <button class="fullscreen-button" id="fullscreenBtn">Go Fullscreen</button>
+
+  <button id="fullscreenBtn" class="fullscreen-button">Go Fullscreen</button>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const iframe = document.querySelector('iframe');
+    document.addEventListener('DOMContentLoaded', function () {
       const fullscreenBtn = document.getElementById('fullscreenBtn');
-      
-      // Function to toggle fullscreen
-      function toggleFullscreen() {
-        try {
-          if (document.fullscreenElement || 
-              document.webkitFullscreenElement || 
-              document.mozFullScreenElement) {
-            // Exit fullscreen
-            if (document.exitFullscreen) {
-              document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-              document.webkitExitFullscreen();
-            } else if (document.mozCancelFullScreen) {
-              document.mozCancelFullScreen();
-            }
-          } else {
-            // Enter fullscreen
-            const element = document.documentElement;
-            if (element.requestFullscreen) {
-              element.requestFullscreen().catch(err => {
-                console.error('Fullscreen error:', err);
-              });
-            } else if (element.webkitRequestFullscreen) {
-              element.webkitRequestFullscreen();
-            } else if (element.mozRequestFullScreen) {
-              element.mozRequestFullScreen();
-            } else if (element.msRequestFullscreen) {
-              element.msRequestFullscreen();
-            }
-          }
-        } catch (err) {
-          console.error('Fullscreen error:', err);
+      const docElement = document.documentElement;
+
+      function isFullscreen() {
+        return document.fullscreenElement || 
+               document.webkitFullscreenElement || 
+               document.mozFullScreenElement || 
+               document.msFullscreenElement;
+      }
+
+      function enterFullscreen() {
+        if (docElement.requestFullscreen) {
+          return docElement.requestFullscreen();
+        } else if (docElement.webkitRequestFullscreen) {
+          return docElement.webkitRequestFullscreen();
+        } else if (docElement.mozRequestFullScreen) {
+          return docElement.mozRequestFullScreen();
+        } else if (docElement.msRequestFullscreen) {
+          return docElement.msRequestFullscreen();
+        } else {
+          console.warn("Fullscreen API is not supported");
+          return Promise.reject("Fullscreen API not supported.");
         }
       }
-      
+
+      function exitFullscreen() {
+        if (document.exitFullscreen) {
+          return document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          return document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          return document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          return document.msExitFullscreen();
+        } else {
+          console.warn("Exit fullscreen API not supported.");
+        }
+      }
+
+      function toggleFullscreen() {
+        if (isFullscreen()) {
+          exitFullscreen().catch(console.error);
+        } else {
+          enterFullscreen().catch(console.error);
+        }
+      }
+
       // Handle fullscreen button click
       fullscreenBtn.addEventListener('click', toggleFullscreen);
-      
-      // Handle fullscreen change events
-      document.addEventListener('fullscreenchange', handleFullscreenChange);
-      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-      
-      function handleFullscreenChange() {
-        if (document.fullscreenElement || 
-            document.webkitFullscreenElement || 
-            document.mozFullScreenElement) {
-          fullscreenBtn.textContent = 'Exit Fullscreen';
+
+      // Change button label on fullscreen events
+      function onFullscreenChange() {
+        if (isFullscreen()) {
+          fullscreenBtn.textContent = "Exit Fullscreen";
         } else {
-          fullscreenBtn.textContent = 'Go Fullscreen';
+          fullscreenBtn.textContent = "Go Fullscreen";
         }
       }
-      
-      // Handle orientation changes
-      window.addEventListener('orientationchange', function() {
+
+      document.addEventListener("fullscreenchange", onFullscreenChange);
+      document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+      document.addEventListener("mozfullscreenchange", onFullscreenChange);
+      document.addEventListener("MSFullscreenChange", onFullscreenChange);
+
+      // Fix iframe sizing on orientation change (mobile handling)
+      window.addEventListener('orientationchange', () => {
         setTimeout(() => {
+          const iframe = document.getElementById('myIframe');
           iframe.style.width = '100%';
           iframe.style.height = '100%';
         }, 300);
       });
-      
-      // Attempt fullscreen automatically (may not work due to browser restrictions)
-      setTimeout(toggleFullscreen, 500);
+
+      // Optional: Try full screen on page load (user interaction required in most browsers)
+      // setTimeout(toggleFullscreen, 1000); // Commented out to prevent autofullscreen blocking
+
     });
   </script>
 </body>
