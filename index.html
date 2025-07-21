@@ -3,114 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>USCA Web App</title>
+  <title>Hot or Not</title>
   <style>
-    /* Basic CSS to make the iframe fill the entire screen */
     html, body {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
-      overflow: hidden; /* Prevents scrollbars on the main page */
-      touch-action: manipulation; /* Improves touch responsiveness */
+      overflow: hidden;
     }
     iframe {
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      border: none; /* Removes the border around the iframe */
-      display: block;
-    }
-    /* Style for the fullscreen button */
-    .fullscreen-button {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 10px 15px;
-      background: rgba(0,0,0,0.7);
-      color: white;
       border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 1000; /* Ensures the button is on top of the iframe */
-      font-size: 14px;
+      display: block;
     }
   </style>
 </head>
 <body>
-  <!-- 
-    This iframe points to your deployed Google Apps Script web app URL.
-    Ensure this URL is correct.
-  -->
   <iframe 
-    src="https://script.google.com/macros/s/AKfycbws4FErfF3TbqeZ8w5247JOBUbmb1Eg0U6SVxbggdpwQDuIO4m39uhAt_XstXZnoBHjOw/exec"
-    allowfullscreen
-    webkitallowfullscreen
-    mozallowfullscreen
+    src="https://script.google.com/macros/s/AKfycbzVHi20DP1Gny01xlAAGxjArdlI8dQbx4PTE5sEf7EcS3hp_bTe3MkE1Wqq94sg6-KR/exec"
+    allowfullscreen="true"
   ></iframe>
-  
-  <button class="fullscreen-button" id="fullscreenBtn">Go Fullscreen</button>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const fullscreenBtn = document.getElementById('fullscreenBtn');
-      const docElement = document.documentElement; // The root element of the page (<html>)
+    window.onload = function() {
+      const iframe = document.querySelector('iframe');
       
-      /**
-       * This function requests to enter or exit fullscreen mode.
-       * It checks for different browser prefixes for compatibility.
-       */
-      function toggleFullscreen() {
-        // Check if we are currently in fullscreen mode
-        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
-
-        if (isFullscreen) {
-          // If in fullscreen, exit
-          if (document.exitFullscreen) {
-            document.exitFullscreen();
-          } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-          } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-          }
-        } else {
-          // If not in fullscreen, request to enter
-          if (docElement.requestFullscreen) {
-            docElement.requestFullscreen().catch(err => console.error(`Fullscreen request failed: ${err.message}`));
-          } else if (docElement.webkitRequestFullscreen) {
-            docElement.webkitRequestFullscreen();
-          } else if (docElement.mozRequestFullScreen) {
-            docElement.mozRequestFullScreen();
-          }
+      // Request fullscreen with fallback for mobile browsers
+      function goFullscreen() {
+        if (iframe.requestFullscreen) {
+          iframe.requestFullscreen().catch(err => {
+            console.error(Fullscreen error: ${err.message});
+          });
+        } else if (iframe.webkitRequestFullscreen) { // iOS Safari
+          iframe.webkitRequestFullscreen();
+        } else if (iframe.mozRequestFullScreen) { // Firefox
+          iframe.mozRequestFullScreen();
         }
       }
-      
-      // When the button is clicked, call the toggleFullscreen function
-      fullscreenBtn.addEventListener('click', toggleFullscreen);
-      
-      /**
-       * This function updates the button text when the fullscreen state changes.
-       */
-      function handleFullscreenChange() {
-        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
-        fullscreenBtn.textContent = isFullscreen ? 'Exit Fullscreen' : 'Go Fullscreen';
-      }
-      
-      // Listen for changes in the fullscreen state
-      document.addEventListener('fullscreenchange', handleFullscreenChange);
-      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.addEventListener('mozfullscreenchange', handleFullscreenChange);
 
-      /*
-        NOTE ON AUTOMATIC FULLSCREEN:
-        Most modern browsers block scripts from triggering fullscreen without a direct
-        user action (like a click). The line `setTimeout(toggleFullscreen, 500)`
-        is unreliable and will likely fail. The most dependable method is to
-        have the user click the button.
-      */
-    });
+      // Attempt fullscreen on load
+      goFullscreen();
+
+      // Handle orientation changes and resize
+      window.addEventListener('orientationchange', goFullscreen);
+      window.addEventListener('resize', () => {
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+      });
+    };
   </script>
 </body>
 </html>
